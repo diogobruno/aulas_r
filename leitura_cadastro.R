@@ -19,3 +19,5 @@ str(cadastro$CEP)
 
 #mostrando a contagem de CEP
 summary(cadastro$CEP)
+
+summary(cadastro)
