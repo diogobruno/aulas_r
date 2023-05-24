@@ -1,0 +1,171 @@
+---
+title: "Média Recortada da Renda Presumida"
+author: "Diogo"
+date: "2023-05-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r dados}
+# nao mostrar os resultados na notacao cientifica
+options(scipen = 999)
+
+
+# importar o Data frame 
+library(readr)
+cadastro <- read_csv("cadastro.csv")
+
+```
+
+```{r str_cadastro}
+# verificar os tipos de variaveis
+str(cadastro)
+```
+
+
+# Medidas resumo 1
+```{r resumo_medidas}
+
+summary(cadastro)
+```
+
+
+# mudar o formato da variavel numerica para texto
+```{r mudar_variaveis}
+cadastro$NUM_CPF <- factor(cadastro$NUM_CPF)
+cadastro$ CHAVE_CONTRATO <- factor(cadastro$ CHAVE_CONTRATO)
+cadastro$CEP <- factor(cadastro$CEP)
+cadastro$CEP_A <- factor(cadastro$CEP_A)
+cadastro$NUMERO <- factor(cadastro$NUMERO)
+cadastro$LATITUDE <- factor(cadastro$LATITUDE)
+cadastro$LONGITUDE <- factor(cadastro$LONGITUDE)
+cadastro$DDD_CELULAR <- factor(cadastro$DDD_CELULAR)
+cadastro$CELULAR <- factor(cadastro$CELULAR)
+cadastro$DDD_CELULAR_2 <- factor(cadastro$DDD_CELULAR_2)
+cadastro$CELULAR_2 <- factor(cadastro$CELULAR_2)
+cadastro$COD_BANCO <- factor(cadastro$COD_BANCO)
+cadastro$NUM_AGENCIA <- factor(cadastro$NUM_AGENCIA)
+cadastro$NUM_CONTA <- factor(cadastro$NUM_CONTA)
+cadastro$CNPJ_CREDOR <- factor(cadastro$CNPJ_CREDOR)
+cadastro$STATUS_CONSENTIMENTO <- factor(cadastro$STATUS_CONSENTIMENTO)
+```
+
+
+```{r tipo2}
+# verificar os tipos de variaveis
+str(cadastro)
+
+```
+
+# Medidas resumo 
+
+```{r summary_cadastro_2}
+summary(cadastro)
+
+```
+
+
+
+# Apresenta as estatisticas: media, desvio padrao e coeficiente de variacao
+
+```{r estaticas_renda}
+
+media_renda <- mean(cadastro$RENDA_PRESUMIDA)
+media_renda
+
+dp_renda <- sd(cadastro$RENDA_PRESUMIDA)
+dp_renda
+
+cv_renda <- dp_renda/media_renda
+cv_renda
+
+
+```
+
+#Graficos: histograma e box plot da RENDA_PRESUMIDA
+
+```{r grafico_box_plot}
+hist(cadastro$RENDA_PRESUMIDA, xlab="Distribuicao da renda presumida (R$)",
+     ylab = "Frequencia absolua",
+     main = "Histograma da renda presumida (R$)")
+```
+
+
+## Deteccao de outliers
+
+```{r outliers}
+
+q1 <- quantile(cadastro$RENDA_PRESUMIDA, 0.25)
+q2 <- quantile(cadastro$RENDA_PRESUMIDA, 0.5)
+q3 <- quantile(cadastro$RENDA_PRESUMIDA, 0.75)
+
+IQR = q3-q1
+
+
+limite1 <- q3 + 3*IQR
+limite2 <- q3 + 1.5*IQR
+limite3 <- q1 - 1.5*IQR
+limite4 <- q1 - 3*IQR
+
+
+
+# criar a variavel outlier_renda
+
+cadastro$outlier_renda <- ifelse(cadastro$RENDA_PRESUMIDA>=limite1,"ponto extremo",
+                                ifelse(cadastro$RENDA_PRESUMIDA>= limite2 & cadastro$RENDA_PRESUMIDA < limite1,"outlier",
+                                       ifelse(cadastro$RENDA_PRESUMIDA>= limite3 & cadastro$RENDA_PRESUMIDA< limite2,"n?o",
+                                              ifelse(cadastro$RENDA_PRESUMIDA > limite4 & cadastro$RENDA_PRESUMIDA < limite3,"outlier", "ponto extremo"))))
+```
+
+# Quantos outliers? Quantos pontos extremos?
+
+```{r tabela}
+
+# Tabela de frequencia da variavel outlier_renda
+table(cadastro$outlier_renda)
+```
+
+#(1) Apresente as medidas resumo da variavel renda presumida 
+
+```{r medida_resumo_renda_presumida}
+
+summary(cadastro$RENDA_PRESUMIDA)
+```
+
+
+# (2) Apresente as medidas resumo da variavel renda presumida sem os outliers
+
+```{r dados_sem_outliers}
+
+#Selecionar o conjunto de dados
+
+renda_semout <- cadastro[cadastro$outlier_renda == "n?o",]
+```
+
+
+```{r grafico2}
+#Apresente o histograma sem os outliers
+hist(renda_semout$RENDA_PRESUMIDA,xlab="Distribuicao da renda presumida (R$)",
+     ylab = "Frequencia absolua",
+     main = "Histograma da renda presumida (R$) sem os outliers")
+```
+
+# (3) Qual a precisao da media da RENDA_PRESUMIDA?
+
+```{r medida3}
+
+
+media_recortada_renda <- mean(renda_semout$RENDA_PRESUMIDA)
+media_recortada_renda
+
+dp_renda_semout <- sd(renda_semout$RENDA_PRESUMIDA)
+dp_renda_semout
+
+cv_renda_semout <- dp_renda_semout/media_recortada_renda
+cv_renda_semout
+```
+
+
